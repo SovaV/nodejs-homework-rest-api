@@ -10,27 +10,26 @@ const listContacts = async () => {
 
 const getContactById = async (contactId) => {
   const contacts = await listContacts()
-  const getContact = contacts.filter(({ id }) => id === contactId)
+  const getContact = contacts.find(({ id }) => id === contactId)
   return getContact
 }
 
 const removeContact = async (contactId) => {
-  const data = await fs.readFile(contactsPath, 'utf8')
-  const contacts = JSON.parse(data)
-  const deletedContact = contacts.filter(({ id }) => id !== contactId)
-  await fs.writeFile(
-    contactsPath,
-    JSON.stringify(deletedContact, null, 2),
-    'utf8'
-  )
-  return deletedContact
+  const products = await listContacts()
+  const idx = products.findIndex((item) => item.id === contactId)
+  if (idx === -1) {
+    return null
+  }
+  const newProducts = products.filter((_, index) => index !== idx)
+  await fs.writeFile(contactsPath, JSON.stringify(newProducts, null, 2))
+  return products[idx]
 }
 
 const addContact = async (body) => {
   const data = await fs.readFile(contactsPath)
   const result = JSON.parse(data)
   const newContact = {
-    id: result.length + 1,
+    id: String(result.length + 1),
     ...body,
   }
   const addNewContacts = result.concat(newContact)
