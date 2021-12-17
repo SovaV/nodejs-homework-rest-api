@@ -41,10 +41,10 @@ router.post('/', async (req, res, next) => {
   try {
     const { error } = joiShema.validate(body)
     if (error) {
-      // throw new BadRequest(error.message)
-      const error = new Error('missing required name field')
-      error.status = 400
-      throw error
+      throw new BadRequest('missing required name field')
+      // const error = new Error('missing required name field')
+      // error.status = 400
+      // throw error
     }
     const contacts = await addContact(body)
     res.status(201).json(contacts)
@@ -71,9 +71,10 @@ router.patch('/:contactId', async (req, res, next) => {
   try {
     const { error } = joiShema.validate(req.body)
     if (error) {
-      const error = new Error('missing fields')
-      error.status = 400
-      throw error
+      throw new BadRequest('missing fields')
+      // const error = new Error('missing fields')
+      // error.status = 400
+      // throw error
     }
     const { contactId } = req.params
     const updateContactById = await updateContact(contactId, req.body)
