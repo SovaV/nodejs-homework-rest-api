@@ -57,23 +57,18 @@ router.delete('/:contactId', async (req, res, next) => {
   }
 })
 
-router.patch('/:contactId', async (req, res, next) => {
+router.put('/:contactId', async (req, res, next) => {
   try {
-    // const { error } = joiShema.validate(req.body)
-    // if (error) {
-    //   throw new BadRequest('missing fields')
-    // }
     const { contactId } = req.params
     const updateContactById = await Contact.findByIdAndUpdate(
       contactId,
       req.body,
       { new: true }
     )
-    if (updateContactById) {
-      res.json(updateContactById)
-    } else {
+    if (!updateContactById) {
       throw new NotFound()
     }
+    res.json(updateContactById)
   } catch (error) {
     if (error.message.includes('validation failed')) {
       error.status = 400
@@ -81,27 +76,25 @@ router.patch('/:contactId', async (req, res, next) => {
     next(error)
   }
 })
-router.patch('/:contactId', async (req, res, next) => {
+router.patch('/:contactId/favorite', async (req, res, next) => {
   try {
-    // const { error } = joiShema.validate(req.body)
-    // if (error) {
-    //   throw new BadRequest('missing fields')
-    // }
     const { contactId } = req.params
+    const { favorite } = req.body
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        message: 'missing field favorite',
+      })
+    }
     const updateContactById = await Contact.findByIdAndUpdate(
       contactId,
-      req.body,
+      { favorite },
       { new: true }
     )
-    if (updateContactById) {
-      res.json(updateContactById)
-    } else {
+    if (!updateContactById) {
       throw new NotFound()
     }
+    res.json(updateContactById)
   } catch (error) {
-    if (error.message.includes('validation failed')) {
-      error.status = 400
-    }
     next(error)
   }
 })
