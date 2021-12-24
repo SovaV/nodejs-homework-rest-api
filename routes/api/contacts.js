@@ -3,7 +3,7 @@ const { NotFound, BadRequest } = require('http-errors')
 const { joiShema } = require('../../model/contact')
 const router = express.Router()
 const { Contact } = require('../../model/index')
-
+//
 router.get('/', async (req, res, next) => {
   try {
     res.json(await Contact.find())
