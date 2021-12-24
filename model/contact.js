@@ -13,7 +13,7 @@ const contactSchema = Schema({
     type: String,
   },
   phone: {
-    type: Number,
+    type: String,
     require: true,
     min: 0.01,
   },
@@ -37,7 +37,7 @@ const contactSchema = Schema({
 const joiShema = Joi.object({
   name: Joi.string().min(2).required(),
   email: Joi.string().required(),
-  phone: Joi.number().min(0.01).required(),
+  phone: Joi.string().required(),
   favorite: Joi.bool,
   status: Joi.string().valueOf('basic', 'sale', 'stock'),
   code: Joi.string().pattern(codeRegexp),
