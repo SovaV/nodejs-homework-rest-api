@@ -3,28 +3,27 @@ const Joi = require('joi')
 
 const emailRegexp = /^\w+([\.-]?\w+)+@\w+([\.:]?\w+)+(\.[a-zA-Z0-9]{2,3})+$/
 
-const userSchema = Schema(
-  {
-    name: {
-      type: String,
-      require: true,
-    },
-    email: {
-      type: String,
-      match: emailRegexp,
-      require: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      minlength: 6,
-      require: true,
-    },
+const userSchema = Schema({
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
   },
-  { versionKey: false, timestamps: true }
-)
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+  },
+  subscription: {
+    type: String,
+    enum: ['starter', 'pro', 'business'],
+    default: 'starter',
+  },
+  token: {
+    type: String,
+    default: null,
+  },
+})
 const joiRegisterShema = Joi.object({
-  name: Joi.string().min(2).required(),
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().min(6).required(),
 })

@@ -1,11 +1,13 @@
 const express = require('express')
 const { BadRequest, Conflict, Unauthorized } = require('http-errors')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const { User } = require('../../model/index')
 const { joiRegisterShema, joiloginShema } = require('../../model/user')
 
 const router = express.Router()
+const { SECRET_KEY } = process.env
 
 router.post('/register', async (req, res, next) => {
   try {
@@ -13,18 +15,22 @@ router.post('/register', async (req, res, next) => {
     if (error) {
       throw new BadRequest(error.message)
     }
-    const { name, email, password } = req.body
+    const { subscription, email, password } = req.body
     const user = await User.findOne({ email })
     if (user) {
       throw new Conflict('User already exist')
     }
     const salt = await bcrypt.genSalt(10)
     const hashPassword = await bcrypt.hash(password, salt)
-    const newUser = await User.create({ name, email, password: hashPassword })
+    const newUser = await User.create({
+      subscription,
+      email,
+      password: hashPassword,
+    })
     res.status(201).json({
       user: {
-        name: newUser.name,
         email: newUser.email,
+        subscription: newUser.subscription,
       },
     })
   } catch (error) {
@@ -47,6 +53,19 @@ router.post('/login', async (req, res, next) => {
     if (!passwordCompare) {
       throw new Unauthorized('Email or password is wrong')
     }
+    const { _id, subscription } = user
+    const payload = {
+      id: _id,
+    }
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' })
+    await User.findByIdAndUpdate(_id, { token })
+    res.json({
+      token,
+      user: {
+        email,
+        subscription,
+      },
+    })
   } catch (error) {
     next(error)
   }
