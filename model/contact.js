@@ -32,6 +32,10 @@ const contactSchema = Schema({
     require: true,
     match: codeRegexp,
   },
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+  },
 })
 
 const joiShema = Joi.object({

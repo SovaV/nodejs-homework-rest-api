@@ -1,12 +1,22 @@
 const express = require('express')
 const { NotFound, BadRequest } = require('http-errors')
+const { authenticate } = require('../../middlewares')
 const { joiShema } = require('../../model/contact')
 const router = express.Router()
 const { Contact } = require('../../model/index')
 //
-router.get('/', async (req, res, next) => {
+router.get('/', authenticate, async (req, res, next) => {
   try {
-    res.json(await Contact.find())
+    const { page = 1, limit = 20, favorite } = req.query
+    const skip = (page - 1) * limit
+    const { _id } = req.user
+    res.json(
+      await Contact.find({ owner: _id }, '-owner -__v', {
+        skip,
+        limit: +limit,
+        favorite,
+      })
+    )
   } catch (error) {
     next(error)
   }
@@ -27,14 +37,15 @@ router.get('/:contactId', async (req, res, next) => {
     next(error)
   }
 })
-router.post('/', async (req, res, next) => {
+router.post('/', authenticate, async (req, res, next) => {
   const body = req.body
   try {
     const { error } = joiShema.validate(body)
     if (error) {
       throw new BadRequest('missing required name field')
     }
-    const newContacts = await Contact.create(body)
+    const { _id } = req.user
+    const newContacts = await Contact.create({ ...body, owner: _id })
     res.status(201).json(newContacts)
   } catch (error) {
     if (error.message.includes('validation failed')) {
