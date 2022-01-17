@@ -10,17 +10,12 @@ router.get('/', authenticate, async (req, res, next) => {
     const { page = 1, limit = 20, favorite } = req.query
     const skip = (page - 1) * limit
     const { _id } = req.user
-    if (favorite) {
-      res.json(await Contact.find({ owner: _id, favorite }))
-    } else {
-      res.json(
-        await Contact.find({ owner: _id }, '-owner -__v', {
-          skip,
-          limit: +limit,
-          favorite,
-        })
-      )
-    }
+    res.json(
+      await Contact.find({ owner: _id, favorite }, '-owner -__v', {
+        skip,
+        limit: +limit,
+      })
+    )
   } catch (error) {
     next(error)
   }
