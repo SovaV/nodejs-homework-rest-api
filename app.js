@@ -16,6 +16,15 @@ const app = express()
 
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 
+app.use(logger(formatsLogger))
+app.use(cors())
+app.use(express.json())
+app.use(express.static('public'))
+
+app.use('/api/auth', authRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/contacts', contactsRouter)
+
 const tmpDir = path.join(__dirname, './tmp')
 const contactDir = path.join(__dirname, '/public/avatars')
 
@@ -42,6 +51,7 @@ app.get('/api/contacts', async (req, res, next) => {
 })
 
 app.post('/api/contacts', upload.single('image'), async (req, res, next) => {
+  console.log(req.file.path)
   try {
     const { path: tmpUpload, filename } = req.file
     const fileUpload = path.join(contactDir, filename)
@@ -54,14 +64,6 @@ app.post('/api/contacts', upload.single('image'), async (req, res, next) => {
     await fs.unlink(tmpUpload)
   }
 })
-app.use(logger(formatsLogger))
-app.use(cors())
-app.use(express.json())
-app.use(express.static('/public/avatars'))
-
-app.use('/api/auth', authRouter)
-app.use('/api/users', usersRouter)
-app.use('/api/contacts', contactsRouter)
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' })

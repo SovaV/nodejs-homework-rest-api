@@ -1,8 +1,12 @@
 const express = require('express')
 const { User } = require('../../model/index')
-const { authenticate } = require('../../middlewares')
+const { authenticate, upload } = require('../../middlewares')
+const path = require('path')
+const fs = require('fs/promises')
 
 const router = express.Router()
+
+const avatarDir = path.join(__dirname, '../../', 'public', 'avatars')
 
 router.get('/logout', authenticate, async (req, res, next) => {
   const { _id } = req.user
@@ -20,4 +24,19 @@ router.get('/current', authenticate, async (req, res, next) => {
   })
 })
 
+router.patch(
+  '/avatars',
+  authenticate,
+  upload.single('avatar'),
+  async (req, res, next) => {
+    const { path: tmpUpload, filename } = req.file
+    const [extension] = filename.split('.').reverse()
+    const newFleName = `${req.user._id}.${extension}`
+    const fileUpload = path.join(avatarDir, filename)
+    await fs.rename(tmpUpload, fileUpload)
+    const avatarURL = path.join('avatars', newFleName)
+    await User.findByIdAndUpdate(req.user._id, { avatarURL }, { new: true })
+    res.json({ avatarURL })
+  }
+)
 module.exports = router
