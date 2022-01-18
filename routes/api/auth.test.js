@@ -24,7 +24,6 @@ describe('test auth', () => {
 
   test('test register route', async () => {
     const registerData = {
-      name: 'Test',
       email: 'Test1@ukr.net',
       password: '123123',
     }
@@ -40,7 +39,23 @@ describe('test auth', () => {
     // check data in database
     const user = await User.findById(response.body._id)
     expect(user).toByThruthy()
-    expect(user.name).toBe(registerData.name)
     expect(user.email).toBe(registerData.email)
   })
+})
+test('test login route', async () => {
+  const loginData = {
+    email: 'Test1@ukr.net',
+    password: '123123',
+  }
+
+  const response = await request(app).post('/api/auth/login').send(loginData)
+
+  // check response
+  expect(response.statusCode).toBe(200)
+  expect(response.body.message).toBe('Register successs')
+
+  // check data in database
+  const user = await User.findById(response.body._id)
+  expect(user).toByThruthy()
+  expect(user.email).toBe(loginData.email)
 })
