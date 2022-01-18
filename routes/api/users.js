@@ -3,6 +3,7 @@ const { User } = require('../../model/index')
 const { authenticate, upload } = require('../../middlewares')
 const path = require('path')
 const fs = require('fs/promises')
+const Jimp = require('jimp')
 
 const router = express.Router()
 
@@ -35,6 +36,14 @@ router.patch(
     const fileUpload = path.join(avatarDir, filename)
     await fs.rename(tmpUpload, fileUpload)
     const avatarURL = path.join('avatars', newFleName)
+
+    Jimp.read(fileUpload, (err, avaJim) => {
+      if (err) throw err
+      avaJim
+        .resize(250, 250) // resize
+        .write(fileUpload) // save
+    })
+
     await User.findByIdAndUpdate(req.user._id, { avatarURL }, { new: true })
     res.json({ avatarURL })
   }
