@@ -22,6 +22,10 @@ const userSchema = Schema({
     type: String,
     default: null,
   },
+  avatarURL: {
+    type: String,
+    default: '',
+  },
 })
 const joiRegisterShema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
